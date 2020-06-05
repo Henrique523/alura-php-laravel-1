@@ -37,22 +37,13 @@ class SeriesController extends Controller
             $request->ep_por_temporada
         );
 
-        $users = User::all();
+        $eventoNovaSerie = new \App\Events\NovaSerie(
+            $request->nome,
+            $request->qtd_temporadas,
+            $request->ep_por_temporada
+        );
+        event($eventoNovaSerie);
 
-        foreach ($users as $indice => $user) {
-
-            $multiplicador = $indice + 1;
-            $email = new NovaSerie(
-                $request->nome,
-                $request->qtd_temporadas,
-                $request->ep_por_temporada
-            );
-            $email->subject = 'Nova Série Adicionada';
-            $when = now()->addSeconds($multiplicador * 10);
-            Mail::to($user)->later($when, $email);
-            //sleep(12);
-        }
-        $email->subject = 'Nova Série Adicionada';
 
         $request->session()->flash(
             'mensagem',
