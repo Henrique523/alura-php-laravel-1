@@ -11,7 +11,9 @@
 |
 */
 
+use App\Mail\NovaSerie;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 Route::get('/series', 'SeriesController@index')->name('listar_series');
 Route::get('/series/criar', 'SeriesController@create')->name('form_criar_serie')->middleware('autenticador');
@@ -39,3 +41,18 @@ Route::get('/sair', function() {
     return redirect('/entrar');
 });
 
+Route::get('/visualizando-email', function() {
+   return new NovaSerie('Arrow', 5, 10);
+});
+
+Route::get('/enviando-email', function() {
+    $email = new NovaSerie('Arrow', 5, 10);
+
+    $email->subject = 'Nova Série Adicionada';
+    $user = (object) [
+        'email' => 'diogo@teste.com',
+        'name' => 'Diogo'
+    ];
+    Mail::to($user)->send($email);
+    return 'Email enviado!';
+});
