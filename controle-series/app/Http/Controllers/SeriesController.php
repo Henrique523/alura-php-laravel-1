@@ -9,13 +9,15 @@ use App\Serie;
 use App\Services\CriadorDeSerie;
 use App\Services\RemovedorDeSerie;
 use App\Temporada;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class SeriesController extends Controller
 {
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $series = Serie::query()->OrderBy('nome')->get();
         $mensagem = $request->session()->get('mensagem');
 
@@ -35,16 +37,22 @@ class SeriesController extends Controller
             $request->ep_por_temporada
         );
 
-        $email = new NovaSerie(
-            $request->nome,
-            $request->qtd_temporadas,
-            $request->ep_por_temporada
-        );
+        $users = User::all();
 
-        $user = $request->user();
+        foreach ($users as $indice => $user) {
+
+            $multiplicador = $indice + 1;
+            $email = new NovaSerie(
+                $request->nome,
+                $request->qtd_temporadas,
+                $request->ep_por_temporada
+            );
+            $email->subject = 'Nova Série Adicionada';
+            $when = now()->addSeconds($multiplicador * 10);
+            Mail::to($user)->later($when, $email);
+            //sleep(12);
+        }
         $email->subject = 'Nova Série Adicionada';
-
-        Mail::to($user)->send($email);
 
         $request->session()->flash(
             'mensagem',
